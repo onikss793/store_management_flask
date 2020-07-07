@@ -1,3 +1,7 @@
+from datetime import datetime
+
+from dateutil import parser
+
 from daos import EmployeeDao
 
 
@@ -26,25 +30,27 @@ class EmployeeService:
 
         result = self.employee_dao.create_vacation(
             employee_id=employee_id,
-            start_at=start_at,
-            finish_at=finish_at
+            start_at=parser.isoparse(start_at).astimezone(),
+            finish_at=parser.isoparse(finish_at).astimezone(),
         )
 
         return True if result else False
 
-    def get_employee_list_by_store_id(self, store_id):
-        employee_list = self.employee_dao.get_employee_list_by_store_id(store_id)
+    def get_employee_list_by_store_id(self, store_id, date):
+        date = parser.isoparse(date).astimezone() if date else datetime.utcnow().isoformat()
+        employee_list = self.employee_dao.get_employee_list_by_store_id(store_id, date)
+        print(date)
 
         return [{
             'id': employee['id'],
             'employee_name': employee['employee_name'],
             'phone_number': employee['phone_number'],
-            'created_at': employee['created_at'],
-            'updated_at': employee['updated_at'],
-            'store': {
-                'id': employee['store_id'],
-                'store_name': employee['store_name'],
-                'created_at': employee['store_created_at'],
-                'updated_at': employee['store_updated_at']
-            }
+            'vacation': bool(employee['vacation'])
         } for employee in employee_list] if employee_list else []
+
+    def check_duplicated_vacation(self, vacation_data):
+        employee_id = vacation_data['employee_id']
+        start_at = vacation_data['start_at']
+        finish_at = vacation_data['finish_at']
+
+        return self.employee_dao.get_duplicated_vacation(employee_id, start_at, finish_at)

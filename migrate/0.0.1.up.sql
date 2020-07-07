@@ -35,7 +35,7 @@ CREATE TABLE stores (
     brand_id    INT          NOT NULL,
     store_name  VARCHAR(30)  NOT NULL UNIQUE,
     password    VARCHAR(255) NOT NULL,
-    is_admin    TINYINT(1)   NOT NULL DEFAULT 0,
+    is_admin    TINYINT      NOT NULL DEFAULT 0,
     created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP    NULL     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     deleted_at  TIMESTAMP    NULL     DEFAULT NULL

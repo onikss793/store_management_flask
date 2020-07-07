@@ -31,7 +31,14 @@ class StoreService:
         if store_data and self.check_password(password, store_data['password']):
             token = self.generate_access_token(store_data['id'])
 
-            return token.decode('UTF-8')
+            data = {
+                'id': store_data['id'],
+                'store_name': store_data['store_name'],
+                'is_admin:': bool(store_data['is_admin']),
+                'access_token': token.decode('UTF-8')
+            }
+
+            return data
         else:
             return None
 
@@ -41,21 +48,31 @@ class StoreService:
         return [{
             'id': store['id'],
             'store_name': store['store_name'],
-            'is_admin': store['is_admin'],
+            'is_admin': bool(store['is_admin']),
             'brand': {
                 'id': store['brand_id'],
                 'brand_name': store['brand_name'],
-                'created_at': store['brand_created_at'],
-                'updated_at': store['brand_updated_at']
-            },
-            'created_at': store['created_at'],
-            'updated_at': store['updated_at']
+            }
         } for store in store_data] if store_data else []
 
-    def check_is_admin(self, store_id):
-        is_admin = self.store_dao.get_is_admin(store_id)['is_admin']
+    def get_store(self, store_id):
+        store = self.store_dao.get_store_by_id(store_id)
 
-        return True if is_admin else False
+        return {
+            'id': store['id'],
+            'store_name': store['store_name'],
+            'is_admin': bool(store['is_admin']),
+            'brand': {
+                'id': store['brand_id'],
+                'brand_name': store['brand_name']
+            }
+        } if store else {}
+
+    def check_is_admin(self, store_id):
+        store = self.store_dao.get_is_admin(store_id)
+        is_admin = bool(store['is_admin']) if store else False
+
+        return is_admin
 
     @staticmethod
     def check_password(password, hashed_password):

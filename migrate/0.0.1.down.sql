@@ -1,5 +1,5 @@
-DROP TABLE brands;
-DROP TABLE employees;
-DROP TABLE reservations;
-DROP TABLE stores;
-DROP TABLE vacations;
+DROP TABLE IF EXISTS brands;
+DROP TABLE IF EXISTS employees;
+DROP TABLE IF EXISTS reservations;
+DROP TABLE IF EXISTS stores;
+DROP TABLE IF EXISTS vacations;

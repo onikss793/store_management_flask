@@ -45,6 +45,12 @@ class EmployeeView:
 
         try:
             employee_service = EmployeeService(connection)
+
+            duplicated_vacation = employee_service.check_duplicated_vacation(vacation_data)
+            print(duplicated_vacation)
+            if duplicated_vacation:
+                abort(409)
+
             result = employee_service.create_vacation(vacation_data)
             connection.commit()
 
@@ -59,20 +65,17 @@ class EmployeeView:
     @authorization.login_required
     @authorization.is_admin
     def get_employee_list(*args, store_id):
-        store_id_: int = 0
+        date = request.args.get('date') if 'date' in request.args.keys() else None
 
-        if not g.is_admin and g.store_id == store_id:
-            store_id_ = store_id
-        elif g.is_admin:
-            store_id_ = store_id
-        else:
-            abort(401)
+        store_id = authorization.get_store_id(g, store_id)
 
         connection = get_db_connection()
 
         try:
             employee_service = EmployeeService(connection)
-            employee_list = employee_service.get_employee_list_by_store_id(store_id_)
+
+            employee_list = employee_service.get_employee_list_by_store_id(store_id, date)
+
             connection.commit()
 
             return jsonify({

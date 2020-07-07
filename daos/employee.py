@@ -41,7 +41,21 @@ class EmployeeDao:
                 'finish_at': finish_at
             })
 
-    def get_employee_list_by_store_id(self, store_id: int):
+    def get_duplicated_vacation(self, employee_id: int, start_at: str, finish_at: str):
+        with self.cursor() as cursor:
+            cursor.execute('''
+                SELECT
+                    id
+                FROM vacations
+                WHERE employee_id = %(employee_id)s
+                AND start_at BETWEEN %(start_at)s AND %(finish_at)s
+                OR finish_at BETWEEN %(start_at)s AND %(finish_at)s
+                AND deleted_at IS NULL
+            ''', {'employee_id': employee_id, 'start_at': start_at, 'finish_at': finish_at})
+
+            return cursor.fetchone()
+
+    def get_employee_list_by_store_id(self, store_id: int, date: str):
         with self.cursor(cursors.DictCursor) as cursor:
             cursor.execute('''
                 SELECT
@@ -50,15 +64,14 @@ class EmployeeDao:
                     EMPLOYEE.phone_number AS phone_number,
                     EMPLOYEE.created_at AS created_at,
                     EMPLOYEE.updated_at AS updated_at,
-                    STORE.id AS store_id,
-                    STORE.store_name AS store_name,
-                    STORE.created_at AS store_created_at,
-                    STORE.updated_at AS store_updated_at
+                    IF(VACATION.id IS NOT NULL, 1, 0) AS vacation
                 FROM employees AS EMPLOYEE
-                LEFT JOIN stores AS STORE ON (EMPLOYEE.store_id = STORE.id)
+                LEFT JOIN vacations AS VACATION 
+                    ON (EMPLOYEE.id = VACATION.employee_id 
+                    AND %(date)s BETWEEN start_at AND finish_at)
                 WHERE EMPLOYEE.store_id = %(store_id)s 
                 AND EMPLOYEE.deleted_at IS NULL
-                AND STORE.deleted_at IS NULL
-            ''', {'store_id': store_id})
+                AND VACATION.deleted_at IS NULL
+            ''', {'store_id': store_id, 'date': date})
 
             return cursor.fetchall()

@@ -71,3 +71,25 @@ class StoreDao:
             ''')
 
             return cursor.fetchall()
+
+    def get_store_by_id(self, store_id):
+        with self.cursor(cursors.DictCursor) as cursor:
+            cursor.execute('''
+                SELECT
+                    STORE.id AS id,
+                    STORE.store_name AS store_name,
+                    STORE.is_admin AS is_admin,
+                    STORE.created_at AS created_at,
+                    STORE.updated_at AS updated_at,
+                    BRAND.id AS brand_id,
+                    BRAND.brand_name AS brand_name,
+                    BRAND.created_at AS brand_created_at,
+                    BRAND.updated_at AS brand_updated_at
+                FROM stores AS STORE
+                LEFT JOIN brands AS BRAND ON (STORE.brand_id = BRAND.id)
+                WHERE STORE.id = %(store_id)s
+                AND STORE.deleted_at IS NULL
+                AND BRAND.deleted_at IS NULL
+            ''', {'store_id': store_id})
+
+            return cursor.fetchone()
