@@ -1,0 +1,9 @@
+config.py
+.env
+env.dev.json
+env.prod.json
+package-lock.json
+serverless.yml
+.idea/*
+node_modules/*
+__pycache__/*
