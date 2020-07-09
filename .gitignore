@@ -7,3 +7,4 @@ serverless.yml
 .idea/*
 node_modules/*
 __pycache__/*
+*/__pycache__
