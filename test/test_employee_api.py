@@ -138,3 +138,34 @@ def test_get_employee_list_200(api):
     } for employee in employee_list_today]
 
     assert resp_data == expected_data_today
+
+
+def test_update_employee_200(api):
+    access_token = session.login_get_access_token(api)
+
+    employee = {
+        'store_id': 2,
+        'employee_name': '업데이트',
+        'phone_number': '01012341234'
+    }
+
+    resp = api.post(
+        '/employee/1',
+        data=json.dumps(employee),
+        content_type='application/json',
+        headers={'Authorization': access_token}
+    )
+
+    assert resp.status_code == 200
+
+
+def test_delete_employee_200(api):
+    access_token = session.login_get_access_token(api)
+
+    resp = api.delete(
+        '/employee/1',
+        content_type='application/json',
+        headers={'Authorization': access_token}
+    )
+
+    assert resp.status_code == 200

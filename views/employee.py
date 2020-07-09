@@ -47,7 +47,7 @@ class EmployeeView:
             employee_service = EmployeeService(connection)
 
             duplicated_vacation = employee_service.check_duplicated_vacation(vacation_data)
-            print(duplicated_vacation)
+
             if duplicated_vacation:
                 abort(409)
 
@@ -66,6 +66,8 @@ class EmployeeView:
     @authorization.is_admin
     def get_employee_list(*args, store_id):
         date = request.args.get('date') if 'date' in request.args.keys() else None
+        if not date:
+            abort(400)
 
         store_id = authorization.get_store_id(g, store_id)
 
@@ -81,6 +83,50 @@ class EmployeeView:
             return jsonify({
                 'data': employee_list
             })
+        except Exception as error:
+            connection.rollback()
+            throw_error(error)
+        finally:
+            connection.close()
+
+    @employee_app.route('/<int:employee_id>', methods=['POST'], endpoint='update_employee')
+    @authorization.login_required
+    def update_employee(*args, employee_id):
+        employee_data = request.json
+
+        if g.store_id != employee_data['store_id']:
+            abort(401)
+
+        employee_data['employee_id'] = employee_id
+
+        connection = get_db_connection()
+
+        try:
+            employee_service = EmployeeService(connection)
+            result = employee_service.update_employee(employee_data)
+            connection.commit()
+
+            return mutation_response(result)
+        except Exception as error:
+            connection.rollback()
+            throw_error(error)
+        finally:
+            connection.close()
+
+    @employee_app.route('/<int:employee_id>', methods=['DELETE'], endpoint='delete_employee')
+    @authorization.login_required
+    def delete_employee(*args, employee_id):
+        store_id = g.store_id
+
+        connection = get_db_connection()
+
+        try:
+            employee_service = EmployeeService(connection)
+
+            result = employee_service.delete_employee_by_id_and_store_id(employee_id, store_id)
+            connection.commit()
+
+            return mutation_response(result)
         except Exception as error:
             connection.rollback()
             throw_error(error)
