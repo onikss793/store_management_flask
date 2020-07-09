@@ -10,7 +10,7 @@ CREATE TABLE employees (
     id            INT          NOT NULL PRIMARY KEY AUTO_INCREMENT,
     store_id      INT          NOT NULL,
     employee_name VARCHAR(20)  NOT NULL,
-    phone_number  VARCHAR(30)  NULL,
+    phone_number  VARCHAR(30)  NULL UNIQUE  KEY,
     enrolled_in   TIMESTAMP    NULL,
     created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP    NULL     DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

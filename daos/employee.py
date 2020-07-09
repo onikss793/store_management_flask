@@ -75,3 +75,28 @@ class EmployeeDao:
             ''', {'store_id': store_id, 'date': date})
 
             return cursor.fetchall()
+
+    def update_employee(self, employee_id, store_id, employee_name, phone_number):
+        with self.cursor() as cursor:
+            return cursor.execute('''
+                UPDATE employees
+                SET employee_name = %(employee_name)s,
+                    phone_number = %(phone_number)s,
+                    store_id = %(store_id)s
+                WHERE id = %(employee_id)s
+                AND deleted_at IS NULL
+            ''', {
+                'employee_id': employee_id,
+                'store_id': store_id,
+                'employee_name': employee_name,
+                'phone_number': phone_number
+            })
+
+    def delete_employee(self, employee_id, store_id):
+        with self.cursor() as cursor:
+            return cursor.execute('''
+                UPDATE employees
+                SET deleted_at = CURRENT_TIMESTAMP
+                WHERE id = %(employee_id)s
+                AND store_id = %(store_id)s
+            ''', {'employee_id': employee_id, 'store_id': store_id})
