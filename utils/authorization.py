@@ -63,3 +63,16 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def get_store_id(g, store_id):
+    result: int = 0
+
+    if not g.is_admin and g.store_id == store_id:
+        result = store_id
+    elif g.is_admin:
+        result = store_id
+    else:
+        abort(401)
+
+    return result

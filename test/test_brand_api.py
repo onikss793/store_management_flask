@@ -4,8 +4,7 @@ import pytest
 
 from app import create_app
 from config import test_config
-from database import get_db_connection
-from test_utils import data, setups
+from test_utils import setups, session
 
 
 @pytest.fixture
@@ -18,21 +17,11 @@ def api():
 
 
 def setup_function():
-    setups.setup_brands()
+    setups.sql_setup()
 
 
 def teardown_function():
-    connection = get_db_connection()
-    cursor = connection.cursor()
-
-    with cursor:
-        cursor.execute('''
-            TRUNCATE brands
-        ''')
-
-        connection.commit()
-
-    connection.close()
+    setups.sql_teardown()
 
 
 def test_create_brand_200(api):
@@ -50,21 +39,17 @@ def test_create_brand_200(api):
 
 
 def test_get_brand_list_200(api):
+    access_token = session.login_get_access_token(api)
+
     resp = api.get(
         '/brand',
-        content_type='application/json'
+        content_type='application/json',
+        headers={'Authorization': access_token}
     )
     resp_json = json.loads(resp.data.decode('utf-8'))
+    print(json.dumps(resp_json, indent=2))
     brand_list = resp_json['data']
-    print(resp_json)
-    print(data.brand_data)
-
-    for brand in brand_list:
-        hasattr(brand, 'id')
-        hasattr(brand, 'brand_name')
-        hasattr(brand, 'created_at')
-        hasattr(brand, 'updated_at')
 
     brand_name_list = [{'brand_name': brand['brand_name']} for brand in brand_list]
 
-    assert brand_name_list == data.brand_data
+    assert brand_name_list == [{'brand_name': '에끌리'}]
