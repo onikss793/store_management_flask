@@ -63,3 +63,31 @@ class ReservationDao:
             })
 
             return cursor.fetchall()
+
+    def update_reservation(self, reservation_id, employee_id: int, start_at: str, finish_at: str, status: str, memo: str):
+        with self.cursor() as cursor:
+            return cursor.execute('''
+                UPDATE reservations
+                SET employee_id = %(employee_id)s,
+                start_at = %(start_at)s,
+                finish_at = %(finish_at)s,
+                status = %(status)s,
+                memo = %(memo)s
+                WHERE id = %(reservation_id)s
+                AND deleted_at IS NULL
+            ''', {
+                'reservation_id': reservation_id,
+                'employee_id': employee_id,
+                'start_at': start_at,
+                'finish_at': finish_at,
+                'status': status,
+                'memo': memo
+            })
+
+    def delete_reservation(self, reservation_id):
+        with self.cursor() as cursor:
+            return cursor.execute('''
+                UPDATE reservations
+                SET deleted_at = NULL
+                WHERE id = %(reservation_id)s
+            ''', {'reservation_id': reservation_id})

@@ -51,3 +51,15 @@ class ReservationService:
             'status': reservation['status'],
             'memo': reservation['memo'],
         } for reservation in reservation_list] if reservation_list else []
+
+    def update_reservation_by_id(self, reservation_data):
+        reservation_id = reservation_data['reservation_id']
+        employee_id = reservation_data['employee_id']
+        start_at = reservation_data['start_at']
+        finish_at = reservation_data['finish_at']
+        status = reservation_data['status']
+        memo = reservation_data['memo']
+
+        result = self.reservation_dao.update_reservation(reservation_id, employee_id, start_at, finish_at, status, memo)
+
+        return bool(result)
